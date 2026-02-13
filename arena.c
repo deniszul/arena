@@ -1,5 +1,7 @@
 #include "arena.h"
 
+#include <assert.h>
+
 #if defined(PLAT_POSIX)
 #include <unistd.h>
 #include <sys/mman.h>
@@ -74,3 +76,60 @@ int plat_memory_decommit(void *ptr, size_t size) {
 #else
 #error "Unsupported Platform!"
 #endif
+
+arena *arena_new(size_t reserve_size, size_t commit_size) {
+	if (reserve_size < 1)
+		reserve_size = ARENA_DEFAULT_RESERVE_SIZE;
+	if (commit_size < 1)
+		commit_size = ARENA_DEFAULT_COMMIT_SIZE;
+
+	reserve_size = reserve_size + ARENA_HEADER_SIZE_ALIGN;
+	commit_size = MAX(commit_size, ARENA_HEADER_SIZE_ALIGN);
+
+	uint32_t pagesize = plat_get_pagesize();
+	reserve_size = ALIGN_UP_POW2(reserve_size, pagesize);
+	commit_size = ALIGN_UP_POW2(commit_size, pagesize);
+
+	void *base = plat_memory_reserve(reserve_size);
+	if (!plat_memory_commit(base, commit_size))
+		PANIC("Commit new arena failed\n");
+
+	arena *a = (arena*)base;
+	a->position = ARENA_HEADER_SIZE_ALIGN;
+	a->committed_size = commit_size;
+	a->commit_size = commit_size;
+	a->reserve_size = reserve_size;
+
+	return a;
+}
+
+void *arena_alloc_align(arena *a, size_t size, size_t align) {
+	assert(a);
+
+	if (size == 0)
+		return NULL;
+
+	assert((align & (align - 1)) == 0);
+	size_t pos_aligned = ALIGN_UP_POW2(a->position, align);
+
+	size_t new_pos = pos_aligned + size;
+	if (new_pos > a->reserve_size)
+		return NULL;
+
+	if (new_pos > a->committed_size) {
+		size_t new_committed_size = ALIGN_UP_POW2(new_pos, a->commit_size);
+		new_committed_size = MIN(new_committed_size, a->reserve_size);
+
+		uint8_t *commit_ptr = (uint8_t*)a + a->committed_size;
+		size_t commit_size = new_committed_size - a->committed_size;
+		if (!plat_memory_commit(commit_ptr, commit_size))
+			return NULL;
+
+		a->committed_size = new_committed_size;
+	}
+
+	a->position = new_pos;
+	uint8_t *out = (uint8_t*)a + pos_aligned;
+
+	return (void*)out;
+}
