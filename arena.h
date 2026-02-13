@@ -17,6 +17,24 @@ extern "C" {
 #error "Unsupported Platform!"
 #endif
 
+#if defined(__clang__)
+#define COMPILER_CLANG
+#elif defined(__GNUC__)
+#define COMPILER_GCC
+#elif defined(_MSVC_VER)
+#define COMPILER_MSVC
+#else
+#error "Unsupported Compiler!"
+#endif
+
+#if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
+#define ALIGN_OF(type) __alignof__(type)
+#elif defined(COMPILER_MSVC)
+#define ALIGN_OF(type) __alignof(type)
+#else
+#error "Unsupported Compiler!"
+#endif
+
 #ifndef PANIC
 #define PANIC(msg, ...) \
 	do { \
@@ -65,6 +83,36 @@ inline void arena_release(arena *a) {
 }
 
 void *arena_alloc_align(arena *a, size_t size, size_t align);
+
+inline void *arena_alloc(arena *a, size_t size) {
+	void *out = arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
+	if (out)
+		memset(out, 0, size);
+
+	return out;
+}
+
+inline void *arena_alloc_nz(arena *a, size_t size) {
+	return arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
+}
+
+#define ALLOC_STRUCT(arena, T) \
+	(T*)memset(arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T)) \
+
+#define ALLOC_STRUCT_NZ(arena, T) \
+	(T*)arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))) \
+
+#define ALLOC_ARRAY(arena, T, count) \
+	(T*)memset(arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T) * count) \
+
+#define ALLOC_ARRAY_NZ(arena, T, count) \
+	(T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))) \
+
+void arena_dealloc(arena *a, size_t size);
+inline void arena_dealloc_to(arena *a, size_t position) {
+	size_t size = position < a->position ? a->position - position : 0;
+	arena_dealloc(a, size);
+}
 
 #ifdef __cplusplus
 }

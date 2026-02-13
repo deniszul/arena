@@ -133,3 +133,21 @@ void *arena_alloc_align(arena *a, size_t size, size_t align) {
 
 	return (void*)out;
 }
+
+void arena_dealloc(arena *a, size_t size) {
+	size_t position = a->position;
+	size_t new_pos = (uint64_t)position - size < ARENA_HEADER_SIZE_ALIGN
+		? ARENA_HEADER_SIZE_ALIGN : (uint64_t)position - size;
+
+	size_t aligned_commit_boundary = ALIGN_UP_POW2(new_pos, a->commit_size);
+	if (aligned_commit_boundary < a->committed_size) {
+		size_t decommit_size = a->committed_size - aligned_commit_boundary;
+		uint8_t *decommit_ptr = (uint8_t*)a + aligned_commit_boundary;
+		if (!plat_memory_decommit(decommit_ptr, decommit_size))
+			return;
+
+		a->committed_size = aligned_commit_boundary;
+	}
+
+	a->position = new_pos;
+}
