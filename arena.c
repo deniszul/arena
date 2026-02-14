@@ -151,3 +151,51 @@ void arena_dealloc(arena *a, size_t size) {
 
 	a->position = new_pos;
 }
+
+#define ARRAY_LENGTH(arr) (sizeof(arr)/sizeof(arr[0]))
+
+static THREAD_LOCAL arena *s_scratch_arenas[2];
+static inline arena *scratch_arena(int index) {
+	assert(index >= 0 && index < (int)ARRAY_LENGTH(s_scratch_arenas));
+	return s_scratch_arenas[index];
+}
+
+static inline void set_scratch_arena(int index, arena *arena) {
+	assert(index >= 0 && index < (int)ARRAY_LENGTH(s_scratch_arenas));
+	s_scratch_arenas[index] = arena;
+}
+
+void arena_scratch_alloc(void) {
+	for (size_t i = 0; i < ARRAY_LENGTH(s_scratch_arenas); i++) {
+		if (!scratch_arena(i))
+			set_scratch_arena(i, arena_new(ARENA_DEFAULT_RESERVE_SIZE, ARENA_DEFAULT_COMMIT_SIZE));
+	}
+}
+
+void arena_scratch_release(void) {
+	for (size_t i = 0; i < ARRAY_LENGTH(s_scratch_arenas); i++) {
+		arena_release(scratch_arena(i));
+		set_scratch_arena(i, NULL);
+	}
+}
+
+arena_temp arena_scratch_begin(arena **conflicts, int conflict_count) {
+	arena_temp scratch = { 0 };
+	for (size_t i = 0; i < ARRAY_LENGTH(s_scratch_arenas); i++) {
+		int is_conflict = 0;
+		for (int j = 0; j < conflict_count; j++) {
+			arena *conflict = conflicts[j];
+			if (scratch_arena(i) == conflict) {
+				is_conflict = 1;
+				break;
+			}
+		}
+		if (!is_conflict) {
+			scratch.arena = scratch_arena(i);
+			scratch.position = scratch.arena->position;
+			break;
+		}
+	}
+
+	return scratch;
+}

@@ -28,6 +28,14 @@ extern "C" {
 #endif
 
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
+#define THREAD_LOCAL __thread
+#elif defined(COMPILER_MSVC)
+#define THREAD_LOCAL __declspec(thread)
+#else
+#error "Unsupported Compiler!"
+#endif
+
+#if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
 #define ALIGN_OF(type) __alignof__(type)
 #elif defined(COMPILER_MSVC)
 #define ALIGN_OF(type) __alignof(type)
@@ -112,6 +120,37 @@ void arena_dealloc(arena *a, size_t size);
 inline void arena_dealloc_to(arena *a, size_t position) {
 	size_t size = position < a->position ? a->position - position : 0;
 	arena_dealloc(a, size);
+}
+
+typedef struct {
+	arena *arena;
+	size_t position;
+} arena_temp;
+
+inline arena_temp arena_temp_begin(arena *a) {
+	return (arena_temp) {
+		.arena = a,
+		.position = a->position
+	};
+}
+
+inline void arena_temp_end(arena_temp temp) {
+	arena_dealloc_to(temp.arena, temp.position);
+}
+
+void arena_scratch_alloc(void);
+void arena_scratch_release(void);
+arena_temp arena_scratch_begin(arena **conflicts, int conflict_count);
+inline void arena_scratch_end(arena_temp scratch) {
+	arena_temp_end(scratch);
+}
+
+inline void arena_scratch_init(void) {
+	arena_scratch_alloc();
+}
+
+inline void arena_scratch_deinit(void) {
+	arena_scratch_release();
 }
 
 #ifdef __cplusplus
