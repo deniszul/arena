@@ -133,7 +133,7 @@ void *arena_alloc_align(arena *a, size_t size, size_t align) {
 
 	size_t new_pos = pos_aligned + size;
 	if (new_pos > a->reserve_size)
-		return NULL;
+		PANIC("Size of arena exceeds the reserve_size\n");
 
 	if (new_pos > a->committed_size) {
 		size_t new_committed_size = ALIGN_UP_POW2(new_pos, a->commit_size);
@@ -162,6 +162,9 @@ void *arena_alloc(arena *a, size_t size) {
 }
 
 void arena_dealloc(arena *a, size_t size) {
+	if (size == 0)
+		return;
+
 	size_t position = a->position;
 	size_t new_pos = (uint64_t)position - size < ARENA_HEADER_SIZE_ALIGN
 		? ARENA_HEADER_SIZE_ALIGN : (uint64_t)position - size;
