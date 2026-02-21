@@ -47,17 +47,9 @@ extern "C" {
 #define MiB(n) ((uint64_t)(n) << 20)
 #define GiB(n) ((uint64_t)(n) << 30)
 
-#ifndef ARENA_DEFAULT_ALIGNMENT
 #define ARENA_DEFAULT_ALIGNMENT 8
-#endif
-
-#ifndef ARENA_DEFAULT_RESERVE_SIZE
 #define ARENA_DEFAULT_RESERVE_SIZE MiB(1)
-#endif
-
-#ifndef ARENA_DEFAULT_COMMIT_SIZE
 #define ARENA_DEFAULT_COMMIT_SIZE KiB(64)
-#endif
 
 uint32_t plat_get_pagesize(void);
 void *plat_memory_reserve(size_t size);
