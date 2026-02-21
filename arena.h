@@ -78,53 +78,35 @@ arena *arena_new(size_t reserve_size, size_t commit_size);
 void arena_release(arena*);
 void *arena_alloc_align(arena*, size_t size, size_t align);
 void *arena_alloc(arena*, size_t size);
+#define arena_alloc_nz(arena, size) arena_alloc_align(arena, size, ARENA_DEFAULT_ALIGNMENT)
 
 void arena_dealloc(arena *a, size_t size);
 void arena_dealloc_to(arena *a, size_t position);
 
 #define ALLOC_STRUCT(arena, T) \
-	(T*)memset(arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T)) \
+	(T*)memset(arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T))
 
 #define ALLOC_STRUCT_NZ(arena, T) \
-	(T*)arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))) \
+	(T*)arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 #define ALLOC_ARRAY(arena, T, count) \
-	(T*)memset(arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T) * count) \
+	(T*)memset(arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T) * count)
 
 #define ALLOC_ARRAY_NZ(arena, T, count) \
-	(T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))) \
-
+	(T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 typedef struct {
 	arena *arena;
 	size_t position;
 } arena_temp;
 
-inline arena_temp arena_temp_begin(arena *a) {
-	return (arena_temp) {
-		.arena = a,
-		.position = a->position
-	};
-}
-
-inline void arena_temp_end(arena_temp temp) {
-	arena_dealloc_to(temp.arena, temp.position);
-}
+#define arena_temp_begin(arena) (arena_temp) { (arena), (arena)->position }
+#define arena_temp_end(temp) arena_dealloc_to((temp).arena, (temp).position)
 
 void arena_scratch_alloc(void);
 void arena_scratch_release(void);
 arena_temp arena_scratch_begin(arena **conflicts, int conflict_count);
-inline void arena_scratch_end(arena_temp scratch) {
-	arena_temp_end(scratch);
-}
-
-inline void arena_scratch_init(void) {
-	arena_scratch_alloc();
-}
-
-inline void arena_scratch_deinit(void) {
-	arena_scratch_release();
-}
+#define arena_scratch_end(scratch) arena_dealloc_to(scratch.arena, scratch.position)
 
 #ifdef __cplusplus
 }
