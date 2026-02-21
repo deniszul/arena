@@ -77,6 +77,21 @@ int plat_memory_decommit(void *ptr, size_t size) {
 #error "Unsupported Platform!"
 #endif
 
+#define ARENA_HEADER_SIZE_ALIGN (ALIGN_UP_POW2(sizeof(arena), ARENA_DEFAULT_ALIGNMENT))
+
+#define ALIGN_UP_POW2(size, align) (((size) + ((align) - 1)) & ~((align) - 1))
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+
+#ifndef PANIC
+#define PANIC(msg) \
+	do { \
+		fprintf(stderr, "Panic! %s:%d @%s\n", __FILE__, __LINE__, __func__); \
+		fprintf(stderr, msg); \
+		abort(); \
+	} while (0)
+#endif
+
 arena *arena_new(size_t reserve_size, size_t commit_size) {
 	if (reserve_size < 1)
 		reserve_size = ARENA_DEFAULT_RESERVE_SIZE;

@@ -43,29 +43,14 @@ extern "C" {
 #error "Unsupported Compiler!"
 #endif
 
-#ifndef PANIC
-#define PANIC(msg, ...) \
-	do { \
-		fprintf(stderr, "Panic! %s:%d @%s\n", __FILE__, __LINE__, __func__); \
-		fprintf(stderr, msg, ##__VA_ARGS__); \
-		abort(); \
-	} while (0) \
-
-#endif
-
 #define KiB(n) ((uint64_t)(n) << 10)
 #define MiB(n) ((uint64_t)(n) << 20)
 #define GiB(n) ((uint64_t)(n) << 30)
-
-#define ALIGN_UP_POW2(size, align) (((size) + ((align) - 1)) & ~((align) - 1))
-#define MIN(a, b) (a) < (b) ? (a) : (b)
-#define MAX(a, b) (a) > (b) ? (a) : (b)
 
 #ifndef ARENA_DEFAULT_ALIGNMENT
 #define ARENA_DEFAULT_ALIGNMENT 8
 #endif
 
-#define ARENA_HEADER_SIZE_ALIGN (ALIGN_UP_POW2(sizeof(arena), ARENA_DEFAULT_ALIGNMENT))
 
 #define ARENA_DEFAULT_RESERVE_SIZE MiB(1)
 #define ARENA_DEFAULT_COMMIT_SIZE KiB(64)
