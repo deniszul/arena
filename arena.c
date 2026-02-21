@@ -118,6 +118,10 @@ arena *arena_new(size_t reserve_size, size_t commit_size) {
 	return a;
 }
 
+void arena_release(arena *a) {
+	plat_memory_release(a, a->reserve_size);
+}
+
 void *arena_alloc_align(arena *a, size_t size, size_t align) {
 	assert(a);
 
@@ -149,6 +153,14 @@ void *arena_alloc_align(arena *a, size_t size, size_t align) {
 	return (void*)out;
 }
 
+void *arena_alloc(arena *a, size_t size) {
+	void *out = arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
+	if (out)
+		memset(out, 0, size);
+
+	return out;
+}
+
 void arena_dealloc(arena *a, size_t size) {
 	size_t position = a->position;
 	size_t new_pos = (uint64_t)position - size < ARENA_HEADER_SIZE_ALIGN
@@ -165,6 +177,11 @@ void arena_dealloc(arena *a, size_t size) {
 	}
 
 	a->position = new_pos;
+}
+
+void arena_dealloc_to(arena *a, size_t position) {
+	size_t size = position < a->position ? a->position - position : 0;
+	arena_dealloc(a, size);
 }
 
 #define ARRAY_LENGTH(arr) (sizeof(arr)/sizeof(arr[0]))

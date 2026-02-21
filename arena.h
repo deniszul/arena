@@ -75,23 +75,12 @@ typedef struct {
 } arena;
 
 arena *arena_new(size_t reserve_size, size_t commit_size);
-inline void arena_release(arena *a) {
-	plat_memory_release(a, a->reserve_size);
-}
+void arena_release(arena*);
+void *arena_alloc_align(arena*, size_t size, size_t align);
+void *arena_alloc(arena*, size_t size);
 
-void *arena_alloc_align(arena *a, size_t size, size_t align);
-
-inline void *arena_alloc(arena *a, size_t size) {
-	void *out = arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
-	if (out)
-		memset(out, 0, size);
-
-	return out;
-}
-
-inline void *arena_alloc_nz(arena *a, size_t size) {
-	return arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
-}
+void arena_dealloc(arena *a, size_t size);
+void arena_dealloc_to(arena *a, size_t position);
 
 #define ALLOC_STRUCT(arena, T) \
 	(T*)memset(arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))), 0, sizeof(T)) \
@@ -105,11 +94,6 @@ inline void *arena_alloc_nz(arena *a, size_t size) {
 #define ALLOC_ARRAY_NZ(arena, T, count) \
 	(T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T))) \
 
-void arena_dealloc(arena *a, size_t size);
-inline void arena_dealloc_to(arena *a, size_t position) {
-	size_t size = position < a->position ? a->position - position : 0;
-	arena_dealloc(a, size);
-}
 
 typedef struct {
 	arena *arena;
