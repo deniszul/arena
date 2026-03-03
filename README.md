@@ -79,4 +79,6 @@ You can adjust the default values by modifying these macros in [`arena.h`](./are
 ```
 
 # Inspiration
-
+- Ryan Fleury [`article`](https://www.dgtlgrove.com/p/untangling-lifetimes-the-arena-allocator)
+- The Stack Frame [`youtube video`](https://youtu.be/ONMdF1AuCBg?si=hAgQCIpoaJrPzd4e)
+- MagicalBat [`youtube video`](https://youtu.be/jgiMagdjA1s?si=VgR0Gt5tB7mgAr20)
