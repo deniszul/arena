@@ -234,3 +234,7 @@ arena_temp arena_scratch_begin(arena **conflicts, int conflict_count) {
 
 	return scratch;
 }
+
+void arena_scratch_end(arena_temp scratch) {
+	arena_dealloc_to(scratch.arena, scratch.position);
+}
