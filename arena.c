@@ -121,7 +121,7 @@ void arena_release(arena *a) {
 	plat_memory_release(a, a->reserve_size);
 }
 
-void *arena_alloc_align(arena *a, size_t size, size_t align) {
+void *arena_alloc_align_nz(arena *a, size_t size, size_t align) {
 	assert(a);
 
 	if (size == 0)
@@ -152,8 +152,8 @@ void *arena_alloc_align(arena *a, size_t size, size_t align) {
 	return (void*)out;
 }
 
-void *arena_alloc(arena *a, size_t size) {
-	void *out = arena_alloc_align(a, size, ARENA_DEFAULT_ALIGNMENT);
+void *arena_alloc_align(arena *a, size_t size, size_t align) {
+	void *out = arena_alloc_align_nz(a, size, align);
 	if (out)
 		memset(out, 0, size);
 

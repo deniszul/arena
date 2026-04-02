@@ -70,6 +70,7 @@ typedef struct {
 
 arena *arena_new(size_t reserve_size, size_t commit_size);
 void arena_release(arena*);
+void *arena_alloc_align_nz(arena*, size_t size, size_t align);
 void *arena_alloc_align(arena*, size_t size, size_t align);
 void *arena_alloc(arena*, size_t size);
 #define arena_alloc_nz(arena, size) arena_alloc_align(arena, size, ARENA_DEFAULT_ALIGNMENT)
