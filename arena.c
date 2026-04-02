@@ -1,5 +1,6 @@
 #include "arena.h"
 
+#include <stdio.h>
 #include <assert.h>
 
 #if defined(PLAT_POSIX)
