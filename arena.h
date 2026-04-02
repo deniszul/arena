@@ -51,6 +51,9 @@ extern "C" {
 #define ARENA_DEFAULT_RESERVE_SIZE MiB(1)
 #define ARENA_DEFAULT_COMMIT_SIZE KiB(64)
 
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+
 uint32_t plat_get_pagesize(void);
 void *plat_memory_reserve(size_t size);
 int plat_memory_release(void *ptr, size_t size);

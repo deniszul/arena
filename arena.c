@@ -80,8 +80,6 @@ int plat_memory_decommit(void *ptr, size_t size) {
 #define ARENA_HEADER_SIZE_ALIGN (ALIGN_UP_POW2(sizeof(arena), ARENA_DEFAULT_ALIGNMENT))
 
 #define ALIGN_UP_POW2(size, align) (((size) + ((align) - 1)) & ~((align) - 1))
-#define MIN(a, b) (a) < (b) ? (a) : (b)
-#define MAX(a, b) (a) > (b) ? (a) : (b)
 
 #ifndef PANIC
 #define PANIC(msg) \
