@@ -9,37 +9,37 @@ extern "C" {
 #include <stddef.h>
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-#define PLAT_POSIX
+    #define PLAT_POSIX
 #elif defined(_WIN32)
-#define PLAT_WINDOWS
+    #define PLAT_WINDOWS
 #else
-#error "Unsupported Platform!"
+    #error "Unsupported Platform!"
 #endif
 
 #if defined(__clang__)
-#define COMPILER_CLANG
+    #define COMPILER_CLANG
 #elif defined(__GNUC__)
-#define COMPILER_GCC
+    #define COMPILER_GCC
 #elif defined(_MSVC_VER)
-#define COMPILER_MSVC
+    #define COMPILER_MSVC
 #else
-#error "Unsupported Compiler!"
+    #error "Unsupported Compiler!"
 #endif
 
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
-#define THREAD_LOCAL __thread
+    #define THREAD_LOCAL __thread
 #elif defined(COMPILER_MSVC)
-#define THREAD_LOCAL __declspec(thread)
+    #define THREAD_LOCAL __declspec(thread)
 #else
-#error "Unsupported Compiler!"
+    #error "Unsupported Compiler!"
 #endif
 
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
-#define ALIGN_OF(type) __alignof__(type)
+    #define ALIGN_OF(type) __alignof__(type)
 #elif defined(COMPILER_MSVC)
-#define ALIGN_OF(type) __alignof(type)
+    #define ALIGN_OF(type) __alignof(type)
 #else
-#error "Unsupported Compiler!"
+    #error "Unsupported Compiler!"
 #endif
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
