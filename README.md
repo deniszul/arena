@@ -73,9 +73,14 @@ arena_alloc_nz(arena, size);
 ## Configuration
 You can adjust the default values by modifying these macros in [`arena.h`](./arena.h)
 ```c
-#define ARENA_DEFAULT_ALIGNMENT 8           // Default alignment
 #define ARENA_DEFAULT_RESERVE_SIZE MiB(1)   // Default initial reserved size
 #define ARENA_DEFAULT_COMMIT_SIZE KiB(64)   // Default initial commit size
+```
+
+except for `ARENA_DEFAULT_ALIGNMENT` you can override by defining the macro before including `arena.h`
+```c
+#define ARENA_DEFAULT_ALIGNMENT 16
+#include "arena.h"
 ```
 
 # Inspiration
