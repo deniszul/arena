@@ -78,8 +78,8 @@ int plat_memory_decommit(void *ptr, size_t size) {
 #error "Unsupported Platform!"
 #endif
 
-#define ARENA_HEADER_SIZE_ALIGN (ALIGN_UP_POW2(sizeof(arena), ARENA_DEFAULT_ALIGNMENT))
-
+#define ARENA_INTERNAL_ALIGNMENT 8
+#define ARENA_HEADER_SIZE_ALIGN (ALIGN_UP_POW2(sizeof(arena), ARENA_INTERNAL_ALIGNMENT))
 #define ALIGN_UP_POW2(size, align) (((size) + ((align) - 1)) & ~((align) - 1))
 
 #ifndef PANIC
