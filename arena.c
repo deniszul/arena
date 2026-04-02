@@ -106,7 +106,7 @@ arena *arena_new(size_t reserve_size, size_t commit_size) {
 
 	void *base = plat_memory_reserve(reserve_size);
 	if (!plat_memory_commit(base, commit_size))
-		PANIC("Commit new arena failed\n");
+        return NULL;
 
 	arena *a = (arena*)base;
 	a->position = ARENA_HEADER_SIZE_ALIGN;
@@ -132,7 +132,7 @@ void *arena_alloc_align(arena *a, size_t size, size_t align) {
 
 	size_t new_pos = pos_aligned + size;
 	if (new_pos > a->reserve_size)
-		PANIC("Size of arena exceeds the reserve_size\n");
+		return NULL;
 
 	if (new_pos > a->committed_size) {
 		size_t new_committed_size = ALIGN_UP_POW2(new_pos, a->commit_size);
