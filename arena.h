@@ -63,12 +63,12 @@ int plat_memory_commit(void *ptr, size_t size);
 int plat_memory_decommit(void *ptr, size_t size);
 
 typedef struct {
-	size_t position;
+    size_t position;
 
-	size_t committed_size;
-	size_t commit_size;
+    size_t committed_size;
+    size_t commit_size;
 
-	size_t reserve_size;
+    size_t reserve_size;
 } arena;
 
 arena *arena_new(size_t reserve_size, size_t commit_size);
@@ -82,20 +82,20 @@ void arena_dealloc(arena*, size_t size);
 void arena_dealloc_to(arena*, size_t position);
 
 #define ALLOC_STRUCT(arena, T) \
-	(T*)arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
+    (T*)arena_alloc_align(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 #define ALLOC_STRUCT_NZ(arena, T) \
-	(T*)arena_alloc_align_nz(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
+    (T*)arena_alloc_align_nz(arena, sizeof(T), MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 #define ALLOC_ARRAY(arena, T, count) \
-	(T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
+    (T*)arena_alloc_align(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 #define ALLOC_ARRAY_NZ(arena, T, count) \
-	(T*)arena_alloc_align_nz(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
+    (T*)arena_alloc_align_nz(arena, sizeof(T) * count, MAX(ARENA_DEFAULT_ALIGNMENT, ALIGN_OF(T)))
 
 typedef struct {
-	arena *arena;
-	size_t position;
+    arena *arena;
+    size_t position;
 } arena_temp;
 
 #define arena_temp_begin(arena) (arena_temp) { (arena), (arena)->position }
