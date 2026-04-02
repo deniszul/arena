@@ -64,9 +64,9 @@ arena_scratch_end(scratch);
 arena_scratch_release();
 ```
 
-This function and macro use ARENA_DEFAULT_ALIGNMENT for alignment
+These macros use ARENA_DEFAULT_ALIGNMENT for alignment
 ```c
-arena_alloc(arena*, size_t size);
+arena_alloc(arena, size);
 arena_alloc_nz(arena, size);
 ```
 
